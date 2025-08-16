@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { UserContext } from "../context/UserContext.jsx"; // Make sure this path matches your project
 
-const API_URL = "http://localhost:4000"; // Update if your backend URL is different
+const API_URL = "http://localhost:4000"; // backend URL is different
 
 const classmates = [
   "HARBHAJAN SINGH", "UTTAM KUMAR PANDIT", "PRIYA NASKAR", "JAYPRAKASH YADAB", "KHUSHI SHAW",
@@ -166,6 +166,11 @@ const Join = () => {
           whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
           {isLoading ? <LoadingDots /> : "Join ClassBazz"}
         </motion.button>
+
+        {/* Footer inside the card */}
+        <div className="mt-4 text-center text-gray-400 text-xs sm:text-sm select-none">
+          © {new Date().getFullYear()} ClassBazz. Developed by Avinash Kr Mandal.
+        </div>
       </motion.div>
     </div>
   );

@@ -10,6 +10,7 @@ import { FiMessageSquare, FiCode, FiImage, FiBarChart2 } from 'react-icons/fi';
 const API_URL = 'http://localhost:4000'; // Change if your backend is deployed
 
 const Room = () => {
+
   const [posts, setPosts] = useState([]);
   const [stats, setStats] = useState({
     onlineCount: 0,
