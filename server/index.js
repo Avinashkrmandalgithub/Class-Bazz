@@ -13,7 +13,7 @@ const server = http.createServer(app);
 // --- CORS Setup ---
 const allowedOrigins = [
   'http://localhost:5173', // Local frontend
-  'https://class-bazz-f6g94s568-avinash-kr-mandals-projects.vercel.app' // Deployed frontend
+  'http://localhost:4173' // Deployed frontend
 ];
 
 app.use(cors({
@@ -25,6 +25,7 @@ app.use(cors({
       callback(new Error(`CORS not allowed for origin: ${origin}`));
     }
   },
+  origin: true,
   credentials: true
 }));
 
