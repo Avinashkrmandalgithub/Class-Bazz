@@ -3,7 +3,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-
 const EMOJI_TYPES = { like: '👍', love: '❤️', laugh: '😂', sad: '😢', angry: '😡' };
 
 const PostContent = ({ post }) => {
@@ -38,7 +37,7 @@ const PostCard = ({ post, socket, currentUser }) => {
   useEffect(() => setReactions(post.reactions || []), [post.reactions]);
   useEffect(() => setComments(post.comments || []), [post.comments]);
 
-  // Handle reaction
+  // Main post reaction
   const handleReaction = (type) => {
     if (!socket) return;
 
@@ -53,7 +52,7 @@ const PostCard = ({ post, socket, currentUser }) => {
     }
   };
 
-  // Handle comment
+  // Comment submission
   const handleComment = () => {
     if (!socket || !commentText.trim()) return;
 
@@ -61,13 +60,36 @@ const PostCard = ({ post, socket, currentUser }) => {
     setCommentText('');
   };
 
-  // Reaction counts
-  const reactionCount = reactions.reduce((acc, r) => {
-    const emoji = EMOJI_TYPES[r.type];
-    if (!emoji) return acc;
-    acc[emoji] = (acc[emoji] || 0) + 1;
-    return acc;
-  }, {});
+  // Comment reaction
+  const handleCommentReaction = (commentId, type) => {
+    if (!socket) return;
+
+    socket.emit('comment:reaction', { postId: post._id, commentId, type });
+
+    setComments(prev =>
+      prev.map(c => {
+        if (c._id !== commentId) return c;
+        const existing = c.reactions?.find(r => r.userId === currentUser.userId);
+        if (existing) {
+          existing.type = type;
+        } else {
+          c.reactions = [...(c.reactions || []), { userId: currentUser.userId, type }];
+        }
+        return { ...c };
+      })
+    );
+  };
+
+  // Count reactions
+  const getReactionCount = (reactionArray) =>
+    reactionArray?.reduce((acc, r) => {
+      const emoji = EMOJI_TYPES[r.type];
+      if (!emoji) return acc;
+      acc[emoji] = (acc[emoji] || 0) + 1;
+      return acc;
+    }, {}) || {};
+
+  const reactionCount = getReactionCount(reactions);
 
   return (
     <div className="bg-[#141529] p-4 rounded-lg animate-fade-in">
@@ -81,6 +103,7 @@ const PostCard = ({ post, socket, currentUser }) => {
 
       <PostContent post={post} />
 
+      {/* Main post reactions */}
       <div className="flex gap-2 mt-4 flex-wrap">
         {Object.entries(EMOJI_TYPES).map(([type, emoji]) => {
           const count = reactionCount[emoji] || 0;
@@ -101,15 +124,39 @@ const PostCard = ({ post, socket, currentUser }) => {
 
       {/* Comments */}
       <div className="mt-4 border-t border-gray-700 pt-3">
-        {comments.map((c, idx) => (
-          <div key={idx} className="flex items-start gap-2 mb-2">
-            <img src={c.user.avatarUrl} alt={c.user.name} className="w-6 h-6 rounded-full object-cover mt-1" />
-            <div>
-              <p className="text-sm font-semibold">{c.user.name}</p>
-              <p className="text-sm text-gray-300">{c.text}</p>
+        {comments.map(c => {
+          const cReactionCount = getReactionCount(c.reactions);
+          return (
+            <div key={c._id} className="flex flex-col gap-2 mb-2">
+              <div className="flex items-start gap-2">
+                <img src={c.user.avatarUrl} alt={c.user.name} className="w-6 h-6 rounded-full object-cover mt-1" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">{c.user.name}</p>
+                  <p className="text-sm text-gray-300">{c.text}</p>
+
+                  {/* Comment reactions */}
+                  <div className="flex gap-2 mt-1 flex-wrap">
+                    {Object.entries(EMOJI_TYPES).map(([type, emoji]) => {
+                      const count = cReactionCount[emoji] || 0;
+                      const isActive = c.reactions?.some(r => r.userId === currentUser.userId && r.type === type);
+                      return (
+                        <span
+                          key={type}
+                          onClick={() => handleCommentReaction(c._id, type)}
+                          className={`px-2 py-0.5 text-xs rounded-full cursor-pointer transition-colors ${
+                            isActive ? 'bg-purple-700' : 'bg-[#2a2d52] hover:bg-[#393d6e]'
+                          }`}
+                        >
+                          {emoji} {count > 0 && <span className="font-semibold">{count}</span>}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Add comment */}
         <div className="flex gap-2 mt-2">

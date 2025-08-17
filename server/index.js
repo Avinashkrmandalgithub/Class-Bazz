@@ -96,6 +96,7 @@ const io = new Server(server, {
   cors: { origin: process.env.CLIENT_ORIGIN, methods: ['GET', 'POST'] }
 });
 
+// Track connected users by userId (not socket.id)
 const connectedUsers = new Map();
 
 // Helper function to get post stats
@@ -107,11 +108,16 @@ const getPostStats = async () => {
   return { textPostCount, codePostCount, imagePostCount, postCount: totalPosts };
 };
 
+// --- New API endpoint to fetch stats ---
+app.get('/api/stats', async (_req, res) => {
+  const postStats = await getPostStats();
+  res.json({ onlineCount: connectedUsers.size, ...postStats });
+});
+
 // Socket auth middleware
 io.use((socket, next) => {
   const token = socket.handshake.auth?.token;
   if (!token) return next(new Error("No auth token"));
-
   try {
     const user = jwt.verify(token, process.env.JWT_SECRET);
     socket.user = user;
@@ -123,68 +129,51 @@ io.use((socket, next) => {
 
 // Socket connection
 io.on('connection', async (socket) => {
-  connectedUsers.set(socket.id, socket.user);
+  const userId = socket.user.userId || socket.id; // fallback if userId missing
+  connectedUsers.set(userId, socket.user);
 
   console.log(`👤 ${socket.user.name} connected (${socket.id})`);
 
-  io.emit('stats:update', { 
-    onlineCount: connectedUsers.size, 
-    ...(await getPostStats()) 
-  });
+  io.emit('stats:update', { onlineCount: connectedUsers.size, ...(await getPostStats()) });
 
+  // Create post
   socket.on('post:create', async (post, ack) => {
     const saved = await Post.create(post);
     io.emit('post:new', saved);
-    io.emit('stats:update', { 
-      onlineCount: connectedUsers.size, 
-      ...(await getPostStats()) 
-    });
+    io.emit('stats:update', { onlineCount: connectedUsers.size, ...(await getPostStats()) });
     ack?.(saved);
   });
 
-  // Reaction via Socket.IO
+  // Reaction
   socket.on('post:reaction', async ({ postId, type }) => {
     const post = await Post.findById(postId);
-    if(!post) return;
+    if (!post) return;
 
-    const userId = socket.user.userId || socket.id; // fallback to socket.id
     const existing = post.reactions.find(r => r.userId === userId);
-
-    if(existing) existing.type = type;
+    if (existing) existing.type = type;
     else post.reactions.push({ userId, type });
 
     await post.save();
     io.emit('post:reaction', post);
   });
 
-  // Socket: add comment
-socket.on('post:comment', async ({ postId, text }) => {
-  if (!text?.trim()) return;
+  // Comment
+  socket.on('post:comment', async ({ postId, text }) => {
+    if (!text?.trim()) return;
 
-  const post = await Post.findById(postId);
-  if (!post) return;
+    const post = await Post.findById(postId);
+    if (!post) return;
 
-  const comment = {
-    user: socket.user,
-    text,
-  };
-  post.comments.push(comment);
-  await post.save();
+    post.comments.push({ user: socket.user, text });
+    await post.save();
+    io.emit('post:comment', post);
+  });
 
-  // Emit updated post with new comment
-  io.emit('post:comment', post);
-});
-
-  
-
+  // Disconnect
   socket.on('disconnect', async () => {
-    connectedUsers.delete(socket.id);
+    connectedUsers.delete(userId);
     console.log(`❌ ${socket.user?.name || "unknown"} disconnected (${socket.id})`);
-
-    io.emit('stats:update', { 
-      onlineCount: connectedUsers.size, 
-      ...(await getPostStats()) 
-    });
+    io.emit('stats:update', { onlineCount: connectedUsers.size, ...(await getPostStats()) });
   });
 });
 

@@ -7,10 +7,9 @@ import NavBar from '../components/NavBar';
 import CreatePost from '../components/CreatePost';
 import { FiMessageSquare, FiCode, FiImage, FiBarChart2 } from 'react-icons/fi';
 
-const API_URL = 'http://localhost:4000'; // Change if your backend is deployed
+const API_URL = 'http://localhost:4000';
 
 const Room = () => {
-
   const [posts, setPosts] = useState([]);
   const [stats, setStats] = useState({
     onlineCount: 0,
@@ -26,17 +25,15 @@ const Room = () => {
   const [showStats, setShowStats] = useState(false);
 
   // Redirect if no user
-  useEffect(() => { 
-    if (!user) navigate('/'); 
+  useEffect(() => {
+    if (!user) navigate('/');
   }, [user, navigate]);
 
-  // Initialize socket with backend auth
+  // Initialize socket
   useEffect(() => {
     if (!user) return;
-
     const newSocket = io(API_URL, { auth: { token: user.token } });
     setSocket(newSocket);
-
     return () => newSocket.disconnect();
   }, [user]);
 
@@ -76,7 +73,7 @@ const Room = () => {
     };
   }, [socket, user]);
 
-  // Auto scroll to latest post
+  // Auto scroll
   useEffect(() => {
     feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [posts]);
@@ -99,7 +96,7 @@ const Room = () => {
       />
 
       <div className='flex flex-1 overflow-hidden'>
-        {/* Sidebar desktop */}
+        {/* Sidebar (desktop) */}
         <aside className='w-64 bg-[#141529] p-4 space-y-6 hidden md:block'>
           <h2 className='text-lg font-semibold mb-4 flex items-center gap-2'>Community Stats</h2>
           <div className='grid grid-cols-2 gap-4 text-center'>
@@ -113,15 +110,9 @@ const Room = () => {
             </div>
           </div>
           <ul className='space-y-2 text-purple-200 font-medium'>
-            <li className="flex items-center gap-2">
-              <FiMessageSquare className="text-green-400" /> Text Posts ({stats.textPostCount})
-            </li>
-            <li className="flex items-center gap-2">
-              <FiCode className="text-green-400" /> Code Posts ({stats.codePostCount})
-            </li>
-            <li className="flex items-center gap-2">
-              <FiImage className="text-green-400" /> Image Posts ({stats.imagePostCount})
-            </li>
+            <li className="flex items-center gap-2"><FiMessageSquare className="text-green-400" /> Text Posts ({stats.textPostCount})</li>
+            <li className="flex items-center gap-2"><FiCode className="text-green-400" /> Code Posts ({stats.codePostCount})</li>
+            <li className="flex items-center gap-2"><FiImage className="text-green-400" /> Image Posts ({stats.imagePostCount})</li>
           </ul>
         </aside>
 
@@ -139,14 +130,14 @@ const Room = () => {
 
       {/* Mobile stats toggle */}
       <button
-        className="md:hidden fixed bottom-4 right-4 bg-purple-600 p-3 rounded-full shadow-lg"
+        className="md:hidden fixed bottom-4 right-4 bg-purple-600 p-3 rounded-full shadow-lg z-50"
         onClick={() => setShowStats(!showStats)}
       >
         <FiBarChart2 size={20} />
       </button>
 
       {showStats && (
-        <div className="fixed inset-0 bg-black/70 flex justify-center items-end md:hidden">
+        <div className="fixed inset-0 bg-black/70 flex justify-center items-end md:hidden z-40">
           <div className="bg-[#141529] w-full rounded-t-2xl p-6 space-y-4 max-h-[80vh] overflow-y-auto">
             <h2 className='text-lg font-semibold mb-4 flex items-center gap-2'>Community Stats</h2>
             <div className='grid grid-cols-2 gap-4 text-center'>
@@ -160,15 +151,9 @@ const Room = () => {
               </div>
             </div>
             <ul className='space-y-2 text-purple-200 font-medium'>
-              <li className="flex items-center gap-2">
-                <FiMessageSquare className="text-green-400" /> Text Posts ({stats.textPostCount})
-              </li>
-              <li className="flex items-center gap-2">
-                <FiCode className="text-green-400" /> Code Posts ({stats.codePostCount})
-              </li>
-              <li className="flex items-center gap-2">
-                <FiImage className="text-green-400" /> Image Posts ({stats.imagePostCount})
-              </li>
+              <li className="flex items-center gap-2"><FiMessageSquare className="text-green-400" /> Text Posts ({stats.textPostCount})</li>
+              <li className="flex items-center gap-2"><FiCode className="text-green-400" /> Code Posts ({stats.codePostCount})</li>
+              <li className="flex items-center gap-2"><FiImage className="text-green-400" /> Image Posts ({stats.imagePostCount})</li>
             </ul>
             <button
               className="w-full mt-4 py-2 bg-purple-600 rounded-lg font-medium"
