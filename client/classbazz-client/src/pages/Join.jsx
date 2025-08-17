@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { UserContext } from "../context/UserContext.jsx"; // Make sure this path matches your project
 
-const API_URL = "https://class-bazz.onrender.com/"; // backend URL is different
+const API_URL = "https://class-bazz.onrender.com"; // backend URL is different
 
 const classmates = [
   "HARBHAJAN SINGH", "UTTAM KUMAR PANDIT", "PRIYA NASKAR", "JAYPRAKASH YADAB", "KHUSHI SHAW",
