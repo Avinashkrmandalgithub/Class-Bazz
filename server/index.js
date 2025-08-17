@@ -13,7 +13,8 @@ const server = http.createServer(app);
 // --- CORS Setup ---
 const allowedOrigins = [
   'http://localhost:5173', // Local frontend
-  'http://localhost:4173' // Deployed frontend
+  'http://localhost:4173', // Deployed frontend
+  'https://class-bazz-avinash.netlify.app'
 ];
 
 app.use(cors({
