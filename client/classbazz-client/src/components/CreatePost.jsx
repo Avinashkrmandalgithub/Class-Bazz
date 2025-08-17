@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaFont, FaCode, FaImage } from 'react-icons/fa';
 
-const API_URL = 'http://localhost:4000';
+const API_URL = 'https://class-bazz.onrender.com/';
 
 const CreatePost = ({ user, socket }) => {
   const [activeTab, setActiveTab] = useState('text');

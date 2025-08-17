@@ -7,7 +7,7 @@ import NavBar from '../components/NavBar';
 import CreatePost from '../components/CreatePost';
 import { FiMessageSquare, FiCode, FiImage, FiBarChart2 } from 'react-icons/fi';
 
-const API_URL = 'http://localhost:4000';
+const API_URL = 'https://class-bazz.onrender.com/';
 
 const Room = () => {
   const [posts, setPosts] = useState([]);
