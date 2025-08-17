@@ -12,9 +12,9 @@ const server = http.createServer(app);
 
 // --- CORS Setup ---
 const allowedOrigins = [
+  'https://class-bazz-avinash.netlify.app',
   'http://localhost:5173', // Local frontend
   'http://localhost:4173', // Deployed frontend
-  'https://class-bazz-avinash.netlify.app'
 ];
 
 app.use(cors({
@@ -26,7 +26,6 @@ app.use(cors({
       callback(new Error(`CORS not allowed for origin: ${origin}`));
     }
   },
-  origin: true,
   credentials: true
 }));
 
