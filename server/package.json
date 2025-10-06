@@ -1,6 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "license": "MIT",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,8 +9,7 @@
     "start": "node index.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Avinash Kr Mandal",
   "type": "module",
   "dependencies": {
     "cloudinary": "^2.7.0",
